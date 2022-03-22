@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat-in-real-time</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="stylesl.css" />
+  </head>
+  <body>
+    <form class="box" id="chat">
+      <h1>Join a chat</h1>
+      <input type="text" name="" id="userName" placeholder="UserName" />
+      <input type="chat" name="" id="chatv" placeholder="Chat" />
+      <input type="submit" name="" value="Go in" />
+
+      <!-- <button onclick="openWin()">Open Chat</button> -->
+    </form>
+    <!-- <button onclick="resizeWin()">Resize window</button> -->
+
+    <script type="text/javascript">
+      let myWindow
+
+      $('#chat').submit(function (event) {
+        event.preventDefault()
+        var userName = document.getElementById('userName').value
+        var chat = document.getElementById('chatv').value
+        console.log(userName, chat)
+
+        openWin(userName, chat)
+      })
+
+      function openWin(userName, chat) {
+        myWindow = window.open(
+          `index.html?username=${userName}&chat=${chat}`,
+          '',
+          'width=454, height=630'
+        )
+      }
+    </script>
+  </body>
+</html>
