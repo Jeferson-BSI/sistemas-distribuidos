@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat-in-real-time</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>WebChat</h1>
+      </div>
+      <div class="body"></div>
+      <div class="footer">
+        <form id="chat">
+          <input type="text" name="message" placeholder="Digite sua mensagem" />
+          <button type="submit">Enviar</button>
+        </form>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      const urlSearchParams = new URLSearchParams(window.location.search)
+      var params = Object.fromEntries(urlSearchParams.entries())
+      var [, , , , h] = new Date().toUTCString().split(' ')
+
+      var data = {
+        type: 'chat',
+        user: params.username,
+        message: '',
+        chat: params.chat,
+        time: h,
+        color: ''
+      }
+
+      function gerar_cor(opacidade = 1) {
+        let r = Math.floor(Math.random() * 255) + 55
+        let g = Math.floor(Math.random() * 150) + 55
+        let b = Math.floor(Math.random() * 150) + 55
+        return `rgba(${r}, ${g}, ${b})`
+      }
+
+      if (!data.user && !data.chat) window.close()
+      if (data.user && data.chat) {
+        const socket = new WebSocket('ws://localhost:3333')
+
+        socket.addEventListener('open', function (event) {
+          data.type = 'info'
+          data.color = gerar_cor()
+          renderMessage(data, true)
+          socket.send(JSON.stringify(data))
+        })
+
+        socket.addEventListener('close', function (event) {
+          window.close()
+          socket.send('Disconnected from the WS Server!')
+        })
+
+        socket.addEventListener('message', function (event) {
+          const dataMessage = JSON.parse(event.data.toString())
+
+          if (data.user != dataMessage.user) renderMessage(dataMessage)
+          // renderMessage(dataMessage)
+        })
+
+        function renderMessage(message, user = false) {
+          const userMessage = `
+        <div class="content">
+          <div class="content_with_time ${user && 'user_content'}">
+            <div class="message_content ${user && 'user_message'}">
+              ${
+                !user
+                  ? `<p style="color: ${message.color}"class="name">${message.user}</p>`
+                  : ''
+              }
+              <p class="message">${message.message}</p>
+            </div>
+            <p class="time ${user && 'user_time'}">${message.time.substr(
+            0,
+            5
+          )}</p>
+          </div>
+        </div>`
+
+          if (user) {
+            textInfo = `Bem-vindo ao chat ${message.user}`
+          } else {
+            textInfo =
+              message.message == 'close'
+                ? `${message.user} Saiu do chat`
+                : `${message.user} Entrou no chat`
+          }
+
+          const messageInfo = `
+        <div class="goin">
+          <p class="goin_text">${textInfo}</p>
+        </div>`
+
+          $('.body').append(message.type == 'chat' ? userMessage : messageInfo)
+          $('.body').animate({ scrollTop: 3000 }, 1000)
+        }
+
+        $('#chat').submit(function (event) {
+          event.preventDefault()
+          var author = data.user
+          var message = $('input[name="message"]')
+          data.message = message.val()
+
+          if (author.length && message.val().length) {
+            data.type = 'chat'
+            socket.send(JSON.stringify(data))
+            renderMessage(data, true)
+            message.val('')
+          }
+        })
+      }
+    </script>
+  </body>
+</html>
