@@ -1,4 +1,4 @@
-## para o funcionamento código do basta instalar a biblioteca websocket
+## para o funcionamento do código basta instalar a biblioteca websocket
 
 - pip install websockets
 
